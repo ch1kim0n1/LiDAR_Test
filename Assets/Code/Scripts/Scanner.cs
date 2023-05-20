@@ -1,3 +1,5 @@
+//by ch1kim0n1
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,6 +7,7 @@ namespace CodeBase.Scripts.Player
 {
     public class Scanner : MonoBehaviour
     {
+        //--------------------------------Initial Variables----------------------------------------------
         [Header("Scan Parameters")]
         [SerializeField] private Transform _scanPoint;  // The point from where the raycasts will be casted.
         [SerializeField] private int _raycastsPerFixedUpdate = 10;  // The number of raycasts to be performed per FixedUpdate.
@@ -19,6 +22,10 @@ namespace CodeBase.Scripts.Player
         private Transform _cameraTransform;  // Reference to the main camera's transform.
 
         private readonly List<PaintableSurface> _contactedSurfacesPerFrame = new List<PaintableSurface>();  // List to store the surfaces that were contacted by the raycasts in the current frame.
+        //--------------------------------------------------------------------------------------------------
+
+
+
 
         private void Start()
         {
@@ -27,11 +34,25 @@ namespace CodeBase.Scripts.Player
 
         private void Update()
         {
-            if (Input.GetMouseButton(0) == false)  // Check if the left mouse button is not pressed. (DEBUG ONLY, TODO: SWAP TO NEW INPUT SYSTEM)
+            if (Input.GetMouseButton(0) == false)  // Check if the left mouse button is not pressed.
                 return;
 
-            PaintSpray();  // Perform the paint spray operation.
+            PaintSpray();  // Perform the paint spray operation. Check every second
         }
+
+        //Camera + gun follow
+        private Vector3 GetDispersedVector()
+        {
+            var direction = _cameraTransform.forward;  // Get the forward direction of the camera.
+
+            direction += Quaternion.AngleAxis(Random.Range(0, 360), _cameraTransform.forward) * _cameraTransform.up * Random.Range(0, _scanDispersion / 360f);  // Apply random dispersion to the direction.
+
+            return direction;  // Return the dispersed vector.
+        }
+
+
+
+
 
         private void PaintSpray()
         {
@@ -55,6 +76,7 @@ namespace CodeBase.Scripts.Player
                 _contactedSurfacesPerFrame.Add(surface);  // Add the surface to the list of contacted surfaces for this frame.
         }
 
+        //this functions will be used to recolor walls and make chacnges on their current texture material, not permanently changing the material
         private void ApplyChangesOnSurfaces()
         {
             foreach (var surface in _contactedSurfacesPerFrame)
@@ -63,15 +85,7 @@ namespace CodeBase.Scripts.Player
             _contactedSurfacesPerFrame.Clear();  // Clear the list of contacted surfaces for the next frame.
         }
 
-        private Vector3 GetDispersedVector()
-        {
-            var direction = _cameraTransform.forward;  // Get the forward direction of the camera.
-
-            direction += Quaternion.AngleAxis(Random.Range(0, 360), _cameraTransform.forward) * _cameraTransform.up * Random.Range(0, _scanDispersion / 360f);  // Apply random dispersion to the direction.
-
-            return direction;  // Return the dispersed vector.
-        }
-
+        //-----------------------------------TEST - NOT TO USE YET------------------------
         private void DecreaseScanRadius()
         {
             ChangeScanRadius(-_dispersionChangeStep);  // Decrease the scan dispersion by the specified step size.
@@ -87,5 +101,6 @@ namespace CodeBase.Scripts.Player
             _scanDispersion += amount;  // Change the scan dispersion by the specified amount.
             _scanDispersion = Mathf.Clamp(_scanDispersion, _minDispersion, _maxDispersion);  // Clamp the scan dispersion between the minimum and maximum values.
         }
+        //---------------------------------------------------------------------------------------
     }
 }

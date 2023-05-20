@@ -1,8 +1,13 @@
+//by ch1kim0n1
+
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
 public class PaintableSurface : MonoBehaviour
 {
+
+
+    //-------------------------------NEW VARIABLES-----------------------------------
     private const float COLOR_IMPACT_ON_PIXEL_DRAW = 0.25f;  // Impact of color when drawing a pixel on the surface.
     private const int TEXTURE_SIZE_PER_UNIT = 96;  // Size of the texture per unit.
 
@@ -12,14 +17,16 @@ public class PaintableSurface : MonoBehaviour
 
     private Texture _texture;  // Texture used for painting on the surface.
     private Texture2D _texture2D;  // Texture2D representation of the painted texture.
+    //----------------------------------------------------------------------------------
 
+
+    //reconize object and make them recolorable(<- thats not a real word)
     private void Awake()
     {
         _objectRenderer.material = _paintableMaterial;  // Assign the paintable material to the object's renderer.
 
-        _texture2D = new Texture2D(
-            TEXTURE_SIZE_PER_UNIT * (int)transform.lossyScale.x,  // Create a new Texture2D with dimensions based on the scale of the object.
-            TEXTURE_SIZE_PER_UNIT * (int)transform.lossyScale.y);
+        // Create a new Texture2D with dimensions based on the scale of the object.
+        _texture2D = new Texture2D(TEXTURE_SIZE_PER_UNIT * (int)transform.lossyScale.x, TEXTURE_SIZE_PER_UNIT * (int)transform.lossyScale.y);
 
         NullifyTexture();  // Initialize the texture with black pixels.
 
@@ -27,6 +34,22 @@ public class PaintableSurface : MonoBehaviour
         _objectRenderer.material.SetColor("_EmissionColor", _emissionColor);  // Set the emission color in the material.
     }
 
+
+    //Restart all pixels(Might use later with a countdown of each spray)
+    private void NullifyTexture()
+    {
+        for (var i = 0; i < _texture2D.width; i++)
+        {
+            for (var j = 0; j < _texture2D.height; j++)
+            {
+                _texture2D.SetPixel(i, j, Color.black);  // Set each pixel in the texture to black.
+            }
+        }
+
+        _texture2D.Apply();  // Apply the changes made to the texture.
+    }
+
+    //2 functions that actually recolor walls
     public void DrawPixelOnRaycastHit(RaycastHit hit)
     {
         var pixelUV = hit.textureCoord;  // UV coordinates of the hit point on the object's texture.
@@ -38,19 +61,6 @@ public class PaintableSurface : MonoBehaviour
 
     public void ApplyTextureChanges()
     {
-        _texture2D.Apply();  // Apply the changes made to the texture.
-    }
-
-    private void NullifyTexture()
-    {
-        for (var i = 0; i < _texture2D.width; i++)
-        {
-            for (var j = 0; j < _texture2D.height; j++)
-            {
-                _texture2D.SetPixel(i, j, Color.black);  // Set each pixel in the texture to black.
-            }
-        }
-
         _texture2D.Apply();  // Apply the changes made to the texture.
     }
 }
